@@ -77,3 +77,64 @@ History API의 경우 기존 `window.history` 객체를 그대로 활용하기 �
 Vite를 사용해 React-ts 환경을 구성
 
 ![명령어 콘솔창 입력](image.png)
+
+## 트러블슈팅 🔫
+
+### 1. Module Import
+
+![모듈 import 에러 메시지](image-1.png)
+모듈을 가져올 때 중괄호를 쓰는 것과 안 쓰는 것의 차이를 몰라서 하나는 중괄호를 쓰고, 하나는 안 써봤다. 그랬더니 중괄호를 쓴 경우에 에러가 바로 발생했다. 다른 거라고는 중괄호 뿐이었는데 뭐가 문제였을까 싶어 구글에 검색해봤다.
+
+- 원인: export 할 때 사용한 default 키워드
+
+export를 하는 방법은 **default** 키워드를 사용하여 기본 export될 요소를 정하는 것과, 아니면 키워드를 쓰지 않는 _named export 방법_ 두 가지다. 그런데 그 중 default 키워드를 사용했을 경우에는 import 시에 중괄호를 쓰면 에러가 났다.
+
+default 키워드는 그 모듈에서는 단 하나의 요소에만 적용해서 export 할 수 있다. 그렇기에 컴포넌트 내에서 named export와 병렬적으로 사용해서 여러 개의 요소를 export 할 수는 있지만, default 키워드가 달린 요소를 import 할 경우에는 중괄호를 쓰지 않는 것이 원칙이었다.
+
+예를 들어서 하나의 모듈에서 default export와 named export를 동시에 import하고 싶을 때는 아래와 같이 처리할 수 있다.
+
+```javascript
+// default 키워드가 들어간 요소는 중괄호에서 배제한다.
+// 구조분해할당(destructuring)을 이용하여 각각의 구성요소를 import하는 방식
+import defaultExport, { namedExport1, namedExport2 } from "./module";
+
+// 모듈 전체를 import 한다.
+// 모듈 전체를 약속된 별칭으로 가져와서 사용하는 방식
+import * as myModule from "./module";
+```
+
+### 2. tsconfig Path
+
+모든 작업을 완료하고 더이상 코드 에디터 상 오류도 안 보이길래 자신만만하게 dev 서버를 열었는데, 브라우저에 나타난 에러 메시지가 심상치 않았다. Router 컴포넌트를 import 한 main 컴포넌트에서 파일을 찾지 못했다는 메시지였다. Router 컴포넌트에 export를 안했나 싶어 급하게 확인했는데 그랬으면 코드 에디터 상에서 먼저 에러 메시지가 보였어야 했다. 분명 컴포넌트 export, import 둘 다 잘 됐는데 왜 브라우저에서는 파일을 찾지 못하는 걸까?
+
+![tsconfig error](image-2.png)
+
+- 원인: vite.config.js 파일에서 alias 설정 X
+
+tsconfig.json 파일에는 baseUrl과 path가 설정되어있으나, vite에서 번들링할 때 타입스크립트의 path를 인식하지 못해서 발생하는 문제였다.
+
+그래서 이를 해결하기 위해 찾은 두 가지 방법은 아래와 같다.
+
+```javascript
+// vite.config.js 파일에서 직접 alias 설정
+//  vite-config-test 브랜치 참고
+//  npm i --save-dev @types/node 명령어로 @types/node 디펜던시 추가
+import path from "path";
+...
+plugins: [react()],
+resolve: {
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, "src") },
+      { find: "@pages", replacement: path.resolve(__dirname, "src/pages") },
+    ],
+  },
+
+
+  // tsconfigPath 플러그인 추가
+  // npm i vite-tsconfig-paths 명령어로 플러그인 추가
+import tsconfigPaths from "vite-tsconfig-paths";
+...
+plugins: [react(), tsconfigPaths()],
+```
+
+두 방법 중에서도 내가 선택한 건 tsconfigPath 플러그인을 사용하는 방식이다. config 파일에서 플러그인만 추가해주면 일일이 alias를 추가할 필요가 없었기 때문에 확실히 프로젝트에서 모듈 경로(alias) 관리를 용이했다. 두 방법 중 어떤 걸 사용해도 문제는 바로 해결됐다.
