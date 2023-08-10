@@ -10,7 +10,7 @@ interface RoutesProps {
 // 지정한 path와 현재 경로가 같을 때 컴포넌트를 렌더링한다.
 const Routes = ({ children }: RoutesProps) => {
   const { pathname: currentPath } = useRouter();
-  console.log(children);
+  // console.log(children);
   const childArray = Array.isArray(children) ? children : [children];
 
   const currentRenderComponent = (childComponent: ReactNode): boolean => {
