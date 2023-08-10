@@ -7,7 +7,7 @@ const About = () => {
   return (
     <div>
       <h1>About</h1>
-      <Link to="/about">To Home</Link>
+      <Link to="/">To Home</Link>
       <button onClick={() => router.push("/")}>home (router.push)</button>
     </div>
   );
