@@ -49,3 +49,5 @@ const Router = ({ children }: RouterProps) => {
     </RouterContext.Provider>
   );
 };
+
+export default Router;
