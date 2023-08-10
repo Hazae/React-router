@@ -1,4 +1,5 @@
 import { type ReactNode, type MouseEvent } from "react";
+import { useRouter } from "@hooks/useRouter";
 
 interface LinkProps {
   children: ReactNode;
@@ -21,3 +22,5 @@ const Link = ({ to, children }: LinkProps) => {
     </a>
   );
 };
+
+export default Link;
