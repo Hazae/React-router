@@ -1,2 +1,2 @@
-# Wanted-challenge-7
-원티드 프리온보딩 챌린지 과제 모음
+# React Router 구현 프로젝트
+
